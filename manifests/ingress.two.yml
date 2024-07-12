@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: workshop
+spec:
+  tls:
+  - hosts:
+    - mlx.today
+    - api.mlx.today
+    secretName: workshop-certificate-secret
+  rules:
+  - host: mlx.today
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: static-service
+            port:
+              number: 80
+  - host: api.mlx.today
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-service
+            port:
+              number: 80
+  - host: ""
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: static-service
+            port:
+              number: 80

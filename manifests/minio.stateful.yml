@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio-statefulset
+  namespace: workshop
+spec:
+  serviceName: minio-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio-pod
+  template:
+    metadata:
+      labels:
+        app: minio-pod
+    spec:
+      containers:
+      - name: minio-container
+        image: quay.io/minio/minio:RELEASE.2024-07-04T14-25-45Z
+        env:
+        - name: MINIO_ROOT_USER
+          value: "ln12nka1a7te"
+        - name: MINIO_ROOT_PASSWORD
+          value: "a1jkcxj2xaopa"
+        command:
+        - /bin/bash
+        - -c
+        args:
+        - minio server /data --console-address :9090
+        volumeMounts:
+        - mountPath: /data
+          name: minio-local-volume
+        ports:
+        - containerPort: 9000
+          name: api
+        - containerPort: 9090
+          name: console
+      nodeSelector:
+        kubernetes.io/hostname: workshop-5
+  volumeClaimTemplates:
+  - metadata:
+      name: minio-local-volume
+    spec:
+      storageClassName: ""
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi

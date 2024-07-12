@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  namespace: workshop
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-pod
+  template:
+    metadata:
+      labels:
+        app: api-pod
+    spec:
+      containers:
+      - name: api-container
+        image: besartshyti/workshop-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3011
+        env:
+        - name: NODE_ENV
+          value: production

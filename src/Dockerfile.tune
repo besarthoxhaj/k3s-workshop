@@ -1,0 +1,15 @@
+#
+#
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
+RUN pip install pyyaml psycopg2-binary docker kubernetes minio
+
+#
+#
+WORKDIR /usr/src/app
+COPY mnist.py .
+COPY predictor.py .
+COPY tune.py .
+
+#
+#
+CMD ["python", "tune.py"]

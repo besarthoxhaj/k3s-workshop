@@ -1,0 +1,76 @@
+- name: Create Hetzner Cloud Servers
+  hosts: localhost
+  gather_facts: no
+  vars:
+    hcloud_token: "{{ lookup('env', 'HCLOUD_TOKEN') }}"
+    server_name: "workshop"
+    server_count: 6
+    server_type: "cx32"
+    image: "ubuntu-24.04"
+    workshop_ssh_key: "{{ lookup('file', './workshop.pub') }}"
+
+  tasks:
+
+    - name: Print and make sure "hcloud_token" is set
+      ansible.builtin.debug:
+        var: hcloud_token
+
+    - name: Ensure SSH key exists on Hetzner
+      hetzner.hcloud.hcloud_ssh_key:
+        api_token: "{{ hcloud_token }}"
+        name: "workshop_ssh_key"
+        public_key: "{{ workshop_ssh_key }}"
+      register: ssh_key
+
+    - name: Create servers
+      hetzner.hcloud.hcloud_server:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ server_name }}-{{ item }}"
+        server_type: "{{ server_type }}"
+        image: "{{ image }}"
+        ssh_keys: [ "{{ ssh_key.hcloud_ssh_key.id }}" ]
+      with_sequence: start=1 end="{{ server_count }}"
+      register: hcloud_servers
+
+    # - name: Print create servers result
+    #   ansible.builtin.debug:
+    #     var: hcloud_servers
+
+    # - name: Save server information to a JSON file
+    #   ansible.builtin.copy:
+    #     content: "{{ hcloud_servers | to_nice_json(indent=2) }}"
+    #     dest: "./hcloud_servers.json"
+
+    - name: Wait for the servers to be running
+      hetzner.hcloud.server_info:
+        api_token: "{{ hcloud_token }}"
+        id: "{{ item.hcloud_server.id }}"
+      with_items: "{{ hcloud_servers.results }}"
+      register: hcloud_servers_info
+
+    # - name: Print servers info
+    #   ansible.builtin.debug:
+    #     var: hcloud_servers_info
+
+    - name: Set IPs for inventory
+      ansible.builtin.set_fact:
+        server_ips: "{{ hcloud_servers_info.results | map(attribute='item.hcloud_server.ipv4_address') | list }}"
+
+    # - name: Print server ips
+    #   ansible.builtin.debug:
+    #     var: server_ips
+
+    - name: Save IPs to inventory file
+      ansible.builtin.copy:
+        dest: ./hosts.ini
+        content: |
+          [master]
+          workshop-1 ansible_host={{ server_ips[0] }}
+
+          [agents]
+          {% for ip in server_ips[1:] %}
+          workshop-{{ loop.index + 1 }} ansible_host={{ ip }}
+          {% endfor %}
+
+          [all:vars]
+          ansible_python_interpreter=auto_silent

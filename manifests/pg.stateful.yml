@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pg-statefulset
+  namespace: workshop
+spec:
+  serviceName: pg-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pg-pod
+  template:
+    metadata:
+      labels:
+        app: pg-pod
+    spec:
+      containers:
+        - name: pg-container
+          image: postgres:13
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: pg-local-volume
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: POSTGRES_USER
+              value: "ab93lka1z1a"
+            - name: POSTGRES_PASSWORD
+              value: "bxlao9koslq51"
+      nodeSelector:
+        kubernetes.io/hostname: workshop-4
+  volumeClaimTemplates:
+  - metadata:
+      name: pg-local-volume
+    spec:
+      storageClassName: ""
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi

@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: workshop-certificate
+  namespace: workshop
+spec:
+  secretName: workshop-certificate-secret
+  issuerRef:
+    name: workshop-cluster-issuer-name
+    kind: ClusterIssuer
+  commonName: mlx.today
+  dnsNames:
+    - mlx.today
+    - api.mlx.today
+  privateKey:
+    algorithm: RSA
+    size: 2048

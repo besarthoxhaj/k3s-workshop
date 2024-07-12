@@ -1,0 +1,15 @@
+#
+#
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
+WORKDIR /usr/src/app
+
+#
+#
+COPY weights.pth .
+COPY mnist.py .
+COPY predictor.py .
+
+#
+#
+RUN pip install Flask
+CMD ["python", "predictor.py"]

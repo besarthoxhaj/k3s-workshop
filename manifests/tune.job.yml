@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tune-job
+  namespace: workshop
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: tune-container
+        image: besartshyti/workshop-tune:latest
+        imagePullPolicy: Always
+        env:
+        - name: APP_ENV
+          value: production
+        volumeMounts:
+        - name: tune-share-directory-volume
+          mountPath: /share
+      - name: kaniko-container
+        image: gcr.io/kaniko-project/executor:latest
+        args:
+        - --verbosity=trace
+        - --context=dir:///share
+        - --destination=docker.io/besartshyti/workshop-predictor:latest
+        volumeMounts:
+        - name: tune-share-directory-volume
+          mountPath: /share
+        - name: tune-docker-config-volume
+          mountPath: /kaniko/.docker/config.json
+          subPath: .dockerconfigjson
+      containers:
+      - name: kubectl-container
+        image: bitnami/kubectl:latest
+        env:
+        - name: KUBECONFIG
+          value: /tmp/config
+        command: ['kubectl']
+        args: ['rollout', 'restart', 'deployment', 'predictor-deployment', '-n', 'workshop']
+        volumeMounts:
+        - name: tune-kube-config-volume
+          mountPath: /tmp/config
+          subPath: config
+      volumes:
+      - name: tune-share-directory-volume
+        emptyDir: {}
+      - name: tune-docker-config-volume
+        secret:
+          secretName: tune-docker-config
+      - name: tune-kube-config-volume
+        configMap:
+          name: tune-kube-config

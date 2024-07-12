@@ -1,0 +1,12 @@
+#
+#
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
+
+#
+#
+RUN apt-get update
+RUN apt-get install -y vim curl
+
+#
+#
+RUN pip install minio

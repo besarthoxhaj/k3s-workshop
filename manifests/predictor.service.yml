@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: predictor-service
+  namespace: workshop
+spec:
+  type: ClusterIP
+  selector:
+    app: predictor-pod
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5015

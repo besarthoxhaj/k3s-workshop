@@ -1,0 +1,109 @@
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 30px;
+    width: 300px;
+    margin: auto;
+  }
+
+  #canvas {
+    margin-top: 10px;
+    background-color: black;
+    border-radius: 4px;
+    width: 300px;
+    height: 300px;
+  }
+
+  #btn_p {
+    flex: 1;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  #btn_c {
+    flex: 1;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: rgb(249, 63, 63);
+    color: white;
+    border: 1px solid rgb(249, 63, 63);
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+
+  #api, #label {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+</style>
+
+<div class="container">
+  <input id="api" type="text" value="http://api.mlx.today/predict">
+  <input id="label" type="text" placeholder="Insert label">
+  <canvas id="canvas" width="300" height="300"></canvas>
+  <div style="width: 100%; display: flex; margin-top: 10px;">
+    <button id="btn_p" onclick="onPrediction()">Predict</button>
+    <button id="btn_c" onclick="onClear()">Clear</button>
+  </div>
+</div>
+
+<script>
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  var isDown = false;
+
+  canvas.addEventListener('mousedown', () => { isDown = true; });
+  canvas.addEventListener('mouseup', () => { isDown = false; ctx.beginPath(); });
+  canvas.addEventListener('mousemove', onDraw);
+
+  function onDraw(e) {
+    if (!isDown) return;
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'white';
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+  }
+
+  function onGrayScale() {
+    const oCtx = document.createElement('canvas');
+    oCtx.width = 28;
+    oCtx.height = 28;
+    const oCtx2d = oCtx.getContext('2d');
+    oCtx2d.drawImage(canvas, 0, 0, 28, 28);
+    const { data } = oCtx2d.getImageData(0, 0, 28, 28);
+    const grey = [];
+    for (let i = 0; i < data.length; i += 4) grey.push((0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]));
+    return grey;
+  }
+
+  async function onPrediction() {
+    const headers = { 'Content-Type': 'application/json' };
+    const payload = { pix: onGrayScale(), label: label.value };
+    const opts = { method: 'POST', headers, body: JSON.stringify(payload) };
+    const res = await fetch(api.value, opts);
+    const { prediction } = await res.json();
+    alert(`Prediction: ${prediction}`);
+  }
+
+  function onClear() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    isDown = false;
+  }
+</script>

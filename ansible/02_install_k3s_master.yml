@@ -1,0 +1,39 @@
+---
+- name: Setup k3s master
+  hosts: master
+  vars:
+    ansible_ssh_private_key_file: ./workshop
+    ansible_user: root
+    ansible_ssh_extra_args: -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+
+  tasks:
+    - name: Install k3s
+      become: true
+      ansible.builtin.shell:
+        cmd: curl -sfL https://get.k3s.io | sh -
+
+    - name: Get token
+      become: true
+      ansible.builtin.shell:
+        cmd: cat /var/lib/rancher/k3s/server/node-token
+      register: node_token
+
+    # - name: Print token
+    #   ansible.builtin.debug:
+    #     msg: '{{ node_token.stdout }}'
+
+    - name: Take remote config
+      become: true
+      ansible.builtin.shell:
+        cmd: cat /etc/rancher/k3s/k3s.yaml
+      register: workshop_config
+
+    # - name: Print config
+    #   ansible.builtin.debug:
+    #     msg: '{{ workshop_config.stdout }}'
+
+    - name: Save remote config in the local machine
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: '{{ workshop_config.stdout }}'
+        dest: ./workshop.config

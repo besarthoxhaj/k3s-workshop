@@ -1,0 +1,14 @@
+#
+#
+FROM node:20.14.0
+WORKDIR /usr/src/app
+
+#
+#
+COPY static.js .
+COPY static.html .
+
+#
+#
+RUN npm install express pg axios --no-save
+CMD ["node", "static.js"]

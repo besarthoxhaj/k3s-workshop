@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-pod
+  namespace: workshop
+spec:
+  containers:
+  - name: debug-container
+    image: besartshyti/workshop-debug:latest
+    stdin: true # Keep stdin open for interactive commands
+    tty: true   # Allocate a TTY for terminal interaction
