@@ -103,3 +103,11 @@ $ kubectl apply -f manifests/cm.issuer.yml
 $ kubectl apply -f manifests/cm.certificate.yml
 $ kubectl apply -f manifests/ingress.two.yml
 ```
+
+## Service
+
+![service](./_assets/service.png)
+
+## Ansible
+
+![ansible](./_assets/ansible.png)
