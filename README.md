@@ -1,5 +1,7 @@
 ## Kubernetes
 
+![overview](./_assets/overview.png)
+
 First, we will create a cluster. The commands below to exactly that,
 create a bare bone cluster with nothing in it but ready to run containers.
 
