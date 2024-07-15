@@ -2,13 +2,13 @@
 - name: Setup k3s agents
   hosts: agents
   vars:
-    ansible_ssh_private_key_file: ./workshop
+    ansible_ssh_private_key_file: ./k3s_workshop
     ansible_user: root
     ansible_ssh_extra_args: -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
 
   tasks:
     - name: Retrieve k3s master token
-      delegate_to: workshop-1
+      delegate_to: k3s-workshop-1
       become: true
       shell: cat /var/lib/rancher/k3s/server/node-token
       register: node_token
@@ -19,4 +19,4 @@
 
     - name: Install k3s on agents
       become: true
-      shell: curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars["workshop-1"]["ansible_host"] }}:6443 K3S_TOKEN={{ node_token["stdout"] }} sh -
+      shell: curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars["k3s-workshop-1"]["ansible_host"] }}:6443 K3S_TOKEN={{ node_token["stdout"] }} sh -

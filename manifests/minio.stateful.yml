@@ -36,7 +36,7 @@ spec:
         - containerPort: 9090
           name: console
       nodeSelector:
-        kubernetes.io/hostname: workshop-5
+        kubernetes.io/hostname: k3s-workshop-5
   volumeClaimTemplates:
   - metadata:
       name: minio-local-volume

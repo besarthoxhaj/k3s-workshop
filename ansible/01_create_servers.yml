@@ -3,11 +3,11 @@
   gather_facts: no
   vars:
     hcloud_token: "{{ lookup('env', 'HCLOUD_TOKEN') }}"
-    server_name: "workshop"
+    server_name: "k3s-workshop"
     server_count: 6
     server_type: "cx32"
     image: "ubuntu-24.04"
-    workshop_ssh_key: "{{ lookup('file', './workshop.pub') }}"
+    ssh_key: "{{ lookup('file', './k3s_workshop.pub') }}"
 
   tasks:
 
@@ -18,8 +18,8 @@
     - name: Ensure SSH key exists on Hetzner
       hetzner.hcloud.hcloud_ssh_key:
         api_token: "{{ hcloud_token }}"
-        name: "workshop_ssh_key"
-        public_key: "{{ workshop_ssh_key }}"
+        name: "k3s_workshop"
+        public_key: "{{ ssh_key }}"
       register: ssh_key
 
     - name: Create servers
@@ -65,11 +65,11 @@
         dest: ./hosts.ini
         content: |
           [master]
-          workshop-1 ansible_host={{ server_ips[0] }}
+          k3s-workshop-1 ansible_host={{ server_ips[0] }}
 
           [agents]
           {% for ip in server_ips[1:] %}
-          workshop-{{ loop.index + 1 }} ansible_host={{ ip }}
+          k3s-workshop-{{ loop.index + 1 }} ansible_host={{ ip }}
           {% endfor %}
 
           [all:vars]

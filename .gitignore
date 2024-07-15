@@ -1,6 +1,6 @@
 node_modules
-workshop.pub
-workshop
+k3s_workshop.pub
+k3s_workshop
 hosts.ini
 workshop.config
 mnist_data

@@ -29,7 +29,7 @@ spec:
             - name: POSTGRES_PASSWORD
               value: "bxlao9koslq51"
       nodeSelector:
-        kubernetes.io/hostname: workshop-4
+        kubernetes.io/hostname: k3s-workshop-4
   volumeClaimTemplates:
   - metadata:
       name: pg-local-volume

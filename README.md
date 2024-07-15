@@ -1,4 +1,4 @@
-## Kubernetes
+## k3s
 
 ![overview](./_assets/overview.png)
 
@@ -6,33 +6,34 @@ First, we will create a cluster. The commands below to exactly that,
 create a bare bone cluster with nothing in it but ready to run containers.
 
 ```sh
-$ conda create --name workshop python=3.12.4 -y
-$ conda activate workshop
+$ conda create --name k3s-workshop python=3.12.4 -y
+$ conda activate k3s-workshop
 $ which pip # ensure you are using "pip" inside the conda env
 $ conda install -c conda-forge nodejs postgresql -y
-$ pip install ansible PyYAML requests python-dateutil torch numpy torchvision Flask psycopg2-binary
+$ pip install ansible PyYAML requests python-dateutil torch numpy torchvision Flask psycopg2-binary minio
 $ ansible-galaxy collection install hetzner.hcloud # new ansible has already hetzner
 $ curl -LO "https://dl.k8s.io/release/v1.30.2/bin/darwin/arm64/kubectl"
 $ chmod +x kubectl
-$ mv kubectl /Users/besartshyti/miniconda3/envs/workshop/bin/kubectl
+$ mv kubectl /Users/besartshyti/miniconda3/envs/k3s-workshop/bin/kubectl
+$ export PATH="/Users/besartshyti/miniconda3/envs/k3s-workshop/bin:$PATH"
 $ which kubectl # if this still points to "/usr/local/bin/kubectl" reactivate conda
-# /Users/[unix]/miniconda3/envs/workshop/bin/kubectl
+# /Users/[unix]/miniconda3/envs/k3s-workshop/bin/kubectl
 $ source .env && cd ansible # make sure to activate .env
-$ ssh-keygen -t rsa -b 4096 -C "foo@bar.com" -f ./workshop -N ""
-$ ansible-playbook 01_create_hetzner_servers.yml
+$ ssh-keygen -t rsa -b 4096 -C "foo@bar.com" -f ./k3s_workshop -N ""
+$ ansible-playbook 01_create_servers.yml
 $ ansible-playbook -i hosts.ini 02_install_k3s_master.yml
 $ ansible-playbook -i hosts.ini 03_install_k3s_agents.yml
 # open workshop_config and change clusters[0].server
 # to the actual master ip address
 $ cd ../ && export KUBECONFIG="$(pwd)/ansible/workshop.config"
-$ kubectl get nodes -o wide
-# NAME         STATUS   ROLES                  AGE   VERSION
-# workshop-1   Ready    control-plane,master   13m   v1.29.6+k3s2
-# workshop-2   Ready    <none>                 13m   v1.29.6+k3s2
-# workshop-3   Ready    <none>                 12m   v1.29.6+k3s2
-# workshop-4   Ready    <none>                 12m   v1.29.6+k3s2
-# workshop-5   Ready    <none>                 12m   v1.29.6+k3s2
-# workshop-6   Ready    <none>                 12m   v1.29.6+k3s2
+$ kubectl get nodes
+# NAME             STATUS   ROLES                  AGE   VERSION
+# k3s-workshop-1   Ready    control-plane,master   13m   v1.29.6+k3s2
+# k3s-workshop-2   Ready    <none>                 13m   v1.29.6+k3s2
+# k3s-workshop-3   Ready    <none>                 12m   v1.29.6+k3s2
+# k3s-workshop-4   Ready    <none>                 12m   v1.29.6+k3s2
+# k3s-workshop-5   Ready    <none>                 12m   v1.29.6+k3s2
+# k3s-workshop-6   Ready    <none>                 12m   v1.29.6+k3s2
 ```
 
 That's great we have our cluster up and running. Time to deploy
@@ -90,7 +91,7 @@ $ kubectl create secret docker-registry tune-docker-config \
 $ kubectl apply -f manifests/minio.stateful.yml
 $ kubectl apply -f manifests/minio.service.yml
 $ kubectl port-forward svc/minio-service 9000:9000 9090:9090 -n workshop
-$ cd src && python train.py # only needed to upload the weights to Minio
+$ python ./src/train.py # only needed to upload the weights to Minio
 $ kubectl apply -f manifests/tune.job.yml
 ```
 
